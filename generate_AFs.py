@@ -1,31 +1,8 @@
-import sys
-if len(sys.argv) > 1 :
-    p_data_file = sys.argv[1]
-else :
-    p_data_file = "words"
+import pyttsx3, sys, os, time
 
-with open(p_data_file, 'r') as data_file :
-    datas = data_file.read().split('\n')
-
-datas_v0, datas_v1 = [], []
-for data in datas :
-    if data[0] == '0' :
-        datas_v0.append(data.split(',')[1:])
-    elif data[0] == '1' :
-        datas_v1.append(data.split(',')[1:])
-
-import pyttsx3
-engine = pyttsx3.init()
+engine = pyttsx3.Engine()
 voices = engine.getProperty('voices')
-
-engine.setProperty('voice', voices[0].id)
-for data in datas_v0 :
-    engine.save_to_file(data[0], data[1])
+engine.setProperty('voice', sys.argv[3])
+engine.save_to_file(sys.argv[1], sys.argv[2])
 engine.runAndWait()
-
-engine.setProperty('voice', voices[1].id)
-for data in datas_v1 :
-    engine.save_to_file(data[0], data[1])
-engine.runAndWait()
-
-engine.stop()
+while not os.path.isfile(sys.argv[2]) : time.sleep(0.01)
