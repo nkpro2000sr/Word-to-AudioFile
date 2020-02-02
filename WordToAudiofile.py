@@ -16,13 +16,14 @@ def _get_voices(seq):
     else :
         gtts = False
     voices = [voice.id for voice in pyttsx3.Engine().getProperty("voices")]
-    seq = list(filter(lambda x:x>=len(voices)+1, seq))
     if ... in seq :
         id_ns = list(range(1,len(voices)+1))
         seq.remove(...)
+        seq = list(filter(lambda x:x>=len(voices)+1, seq))
         for i in seq :
            id_ns.remove(i)
     else :
+        seq = list(filter(lambda x:x>=len(voices)+1, seq))
         id_ns = seq
     return gtts, [voices[i-1] for i in id_ns]
 
@@ -193,4 +194,3 @@ def rmempty (outdir= "output"):
             os.rmdir(os.path.join(outdir,word))
         except:
             pass
-
