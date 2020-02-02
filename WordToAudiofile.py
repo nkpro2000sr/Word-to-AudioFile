@@ -1,14 +1,15 @@
-import os, sys, shutil, subprocess
+import os, sys, shutil, subprocess, logging
 
 from gtts import gTTS 
 from pydub import AudioSegment as As
 
 log = logging.getLogger(__name__)
 log.addHandler(logging.StreamHandler(sys.stdout))
+log.setLevel(logging.INFO)
 
 def wta(infile= "infile.txt", outdir= "output",
         seq= [1,1,1], normalizer= [1,1,1],      #gtts,pyttsx3.v[0],pyttsx3.v[1]
-        duer= 2000, rmold= False, max_AF_per_process= None, log_level= 20) :
+        duer= 2000, rmold= False, max_AF_per_process= None) :
     """ 
     to generate audio files for given words in $infile
     and save audio files in $outdir with subdirs names as words
@@ -52,6 +53,7 @@ def wta(infile= "infile.txt", outdir= "output",
         if max_AF_per_process == None :
             max_AF_per_process = subprocess.call([p_python, "test_pyttsx3_engine_inMAC.py"])
             max_AF_per_process-=2
+        if max_AF_per_process > 10 : max_AF_per_process-=10 #for safer side
 
         language = 'en' #language assignment
         for word in words :
@@ -64,12 +66,14 @@ def wta(infile= "infile.txt", outdir= "output",
                     c_pyttsx3.append(','.join(['0', word, os.path.join(outdir,word,"m.mp3")]))
                 if seq[2]==1 :
                     c_pyttsx3.append(','.join(['1', word, os.path.join(outdir,word,"f1.mp3")]))
-                if len(c_pyttsx3)==max_AF_per_process :
+                if len(c_pyttsx3)>=max_AF_per_process :
                     log.debug("calling",p_pyttsx3_AFgen,"with",str(len(c_pyttsx3)),"words")
                     with open(p_words_file,'w') as c_file :
                         c_file.write("\n".join(c_pyttsx3))
                     c_pyttsx3 = []
                     return_code = subprocess.call([p_python, p_pyttsx3_AFgen, p_words_file])
+                    if return_code == 0 : os.remove(p_words_file)
+                    else : log.error(p_pyttsx3_AFgen,"returned with",str(return_code))
                     log.debug(p_pyttsx3_AFgen,"returned with",str(return_code))
             except FileExistsError:
                 pass
@@ -83,6 +87,8 @@ def wta(infile= "infile.txt", outdir= "output",
                 c_file.write("\n".join(c_pyttsx3))
             c_pyttsx3 = []
             return_code = subprocess.call([p_python, p_pyttsx3_AFgen, p_words_file])
+            if return_code == 0 : os.remove(p_words_file)
+            else : log.error(p_pyttsx3_AFgen,"returned with",str(return_code))
             log.debug(p_pyttsx3_AFgen,"returned with",str(return_code))
 
         log.debug(words2)
@@ -224,4 +230,3 @@ def rmempty (outdir= "output"):
             os.rmdir(os.path.join(outdir,word))
         except:
             pass
-
