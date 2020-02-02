@@ -53,7 +53,7 @@ def wta(infile= "infile.txt", outdir= "output",
         if max_AF_per_process == None :
             max_AF_per_process = subprocess.call([p_python, "test_pyttsx3_engine_inMAC.py"])
             max_AF_per_process-=2
-        if max_AF_per_process > 10 : max_AF_per_process-=10 #for safer side
+        if max_AF_per_process > 10 : max_AF_per_process-=10 # for safer side
 
         language = 'en' #language assignment
         for word in words :
@@ -67,29 +67,29 @@ def wta(infile= "infile.txt", outdir= "output",
                 if seq[2]==1 :
                     c_pyttsx3.append(','.join(['1', word, os.path.join(outdir,word,"f1.mp3")]))
                 if len(c_pyttsx3)>=max_AF_per_process :
-                    log.debug("calling",p_pyttsx3_AFgen,"with",str(len(c_pyttsx3)),"words")
+                    log.debug("calling "+p_pyttsx3_AFgen+" with "+str(len(c_pyttsx3))+" words")
                     with open(p_words_file,'w') as c_file :
                         c_file.write("\n".join(c_pyttsx3))
                     c_pyttsx3 = []
                     return_code = subprocess.call([p_python, p_pyttsx3_AFgen, p_words_file])
                     if return_code == 0 : os.remove(p_words_file)
-                    else : log.error(p_pyttsx3_AFgen,"returned with",str(return_code))
-                    log.debug(p_pyttsx3_AFgen,"returned with",str(return_code))
+                    else : log.error(p_pyttsx3_AFgen+" returned with "+str(return_code))
+                    log.debug(p_pyttsx3_AFgen+" returned with "+str(return_code))
             except FileExistsError:
                 pass
             except :
-                log.error("form audio generating",sys.exc_info())
+                log.error("form audio generating "+sys.exc_info())
             else:
                 words2.append(word)
         if len(c_pyttsx3) :
-            log.debug("calling",p_pyttsx3_AFgen,"with",str(len(c_pyttsx3)),"words")
+            log.debug("calling "+p_pyttsx3_AFgen+" with "+str(len(c_pyttsx3))+" words")
             with open(p_words_file,'w') as c_file :
                 c_file.write("\n".join(c_pyttsx3))
             c_pyttsx3 = []
             return_code = subprocess.call([p_python, p_pyttsx3_AFgen, p_words_file])
             if return_code == 0 : os.remove(p_words_file)
-            else : log.error(p_pyttsx3_AFgen,"returned with",str(return_code))
-            log.debug(p_pyttsx3_AFgen,"returned with",str(return_code))
+            else : log.error(p_pyttsx3_AFgen+" returned with "+str(return_code))
+            log.debug(p_pyttsx3_AFgen+" returned with "+str(return_code))
 
         log.debug(words2)
         log.info(len(words2))
@@ -115,12 +115,12 @@ def wta(infile= "infile.txt", outdir= "output",
                         if rmold : os.remove(os.path.join(normalizer,word,audio))
                     else:
                         os.makedirs(os.path.join(outdir,"~LargerThan_duer",word), exist_ok=True)
-                        log.debug("moving", os.path.join(normalizer,word,audio), os.path.join(outdir,"~LargerThan_duer",word))
+                        log.debug("moving "+os.path.join(normalizer,word,audio)+' '+os.path.join(outdir,"~LargerThan_duer",word))
                         shutil.move(os.path.join(normalizer,word,audio), os.path.join(outdir,"~LargerThan_duer",word))
                 except:
-                    log.error("form normalizing", sys.exc_info())
+                    log.error("form normalizing "+sys.exc_info())
                     os.makedirs(os.path.join(outdir,"~Defects",word), exist_ok=True)
-                    log.debug("moving", os.path.join(normalizer,word,audio), os.path.join(outdir,"~Defects",word))
+                    log.debug("moving "+os.path.join(normalizer,word,audio)+' '+os.path.join(outdir,"~Defects",word))
                     shutil.move(os.path.join(normalizer,word,audio), os.path.join(outdir,"~Defects",word))
 
     elif type(normalizer)==list :
@@ -139,12 +139,12 @@ def wta(infile= "infile.txt", outdir= "output",
                         if rmold : os.remove(os.path.join(outdir,word,"f.mp3"))
                     else:
                         os.makedirs(os.path.join(outdir,"~LargerThan_duer",word), exist_ok=True)
-                        log.debug("moving", os.path.join(outdir,word,"f.mp3"), os.path.join(outdir,"~LargerThan_duer",word))
+                        log.debug("moving "+os.path.join(outdir,word,"f.mp3")+' '+os.path.join(outdir,"~LargerThan_duer",word))
                         shutil.move(os.path.join(outdir,word,"f.mp3"), os.path.join(outdir,"~LargerThan_duer",word))
                 except:
-                    log.error("form normalizing f.mp3", sys.exc_info())
+                    log.error("form normalizing f.mp3 "+sys.exc_info())
                     os.makedirs(os.path.join(outdir,"~Defects",word), exist_ok=True)
-                    log.debug("moving", os.path.join(outdir,word,"f.mp3"), os.path.join(outdir,"~Defects",word))
+                    log.debug("moving "+os.path.join(outdir,word,"f.mp3")+' '+os.path.join(outdir,"~Defects",word))
                     shutil.move(os.path.join(outdir,word,"f.mp3"), os.path.join(outdir,"~Defects",word))
             log.info("done normalizing all f.mp3")
         if normalizer[1] :
@@ -162,12 +162,12 @@ def wta(infile= "infile.txt", outdir= "output",
                         if rmold : os.remove(os.path.join(outdir,word,"m.mp3"))
                     else:
                         os.makedirs(os.path.join(outdir,"~LargerThan_duer",word), exist_ok=True)
-                        log.debug("moving", os.path.join(outdir,word,"m.mp3"), os.path.join(outdir,"~LargerThan_duer",word))
+                        log.debug("moving "+os.path.join(outdir,word,"m.mp3")+' '+os.path.join(outdir,"~LargerThan_duer",word))
                         shutil.move(os.path.join(outdir,word,"m.mp3"), os.path.join(outdir,"~LargerThan_duer",word))
                 except:
-                    log.error("form normalizing m.mp3", sys.exc_info())
+                    log.error("form normalizing m.mp3 "+sys.exc_info())
                     os.makedirs(os.path.join(outdir,"~Defects",word), exist_ok=True)
-                    log.debug("moving", os.path.join(outdir,word,"m.mp3"), os.path.join(outdir,"~Defects",word))
+                    log.debug("moving "+os.path.join(outdir,word,"m.mp3")+' '+os.path.join(outdir,"~Defects",word))
                     shutil.move(os.path.join(outdir,word,"m.mp3"), os.path.join(outdir,"~Defects",word))
             log.info("done normalizing all f.mp3")
         if normalizer[2] :
@@ -185,12 +185,12 @@ def wta(infile= "infile.txt", outdir= "output",
                         if rmold : os.remove(os.path.join(outdir,word,"f1.mp3"))
                     else:
                         os.makedirs(os.path.join(outdir,"~LargerThan_duer",word), exist_ok=True)
-                        log.debug("moving", os.path.join(outdir,word,"f1.mp3"), os.path.join(outdir,"~LargerThan_duer",word))
+                        log.debug("moving "+os.path.join(outdir,word,"f1.mp3")+' '+os.path.join(outdir,"~LargerThan_duer",word))
                         shutil.move(os.path.join(outdir,word,"f1.mp3"), os.path.join(outdir,"~LargerThan_duer",word))
                 except:
-                    log.error("form normalizing f1.mp3", sys.exc_info())
+                    log.error("form normalizing f1.mp3 "+sys.exc_info())
                     os.makedirs(os.path.join(outdir,"~Defects",word), exist_ok=True)
-                    log.debug("moving", os.path.join(outdir,word,"f1.mp3"), os.path.join(outdir,"~Defects",word))
+                    log.debug("moving "+os.path.join(outdir,word,"f1.mp3")+' '+os.path.join(outdir,"~Defects",word))
                     shutil.move(os.path.join(outdir,word,"f1.mp3"), os.path.join(outdir,"~Defects",word))
             log.info("done normalizing all f.mp3")
 
@@ -202,20 +202,20 @@ def rmold (outdir= "output", files =["f.mp3","m.mp3","f1.mp3"], move= False):
     words = os.listdir(outdir)
     for word in words:
         if not os.path.isdir(os.path.join(outdir,word)) :
-            log.error(outdir,word,"is not a dir")
+            log.error(outdir+' '+word+" is not a dir")
             continue
         for file in files:
             if not move:
                 try:
                     os.remove(os.path.join(outdir,word,file))
                 except:
-                    log.error("not able to delete",outdir,word,file)
+                    log.error("not able to delete "+outdir+' '+word+' '+file)
             else:
                 try:
                     os.makedirs(os.path.join(move,word), exist_ok=True)
                     shutil.move(os.path.join(outdir,word,file), os.path.join(move,word))
                 except:
-                    log.error("not able to move",outdir,word,file)
+                    log.error("not able to move "+outdir+' '+word+' '+file)
 
 def rmempty (outdir= "output"):
     """
@@ -224,7 +224,7 @@ def rmempty (outdir= "output"):
     words = os.listdir(outdir)
     for word in words:
         if not os.path.isdir(os.path.join(outdir,word)) :
-            log.error(outdir,word,"is not a dir")
+            log.error(outdir+' '+word+" is not a dir")
             continue
         try:
             os.rmdir(os.path.join(outdir,word))
