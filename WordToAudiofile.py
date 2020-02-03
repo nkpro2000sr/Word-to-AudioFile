@@ -79,7 +79,7 @@ def wta(infile= "infile.txt", outdir= "output",
             except FileExistsError:
                 pass
             except :
-                log.error("form audio generating "+sys.exc_info())
+                log.error("form audio generating "+str(sys.exc_info()))
             else:
                 err_free_words.append(word)
 
@@ -110,7 +110,7 @@ def wta(infile= "infile.txt", outdir= "output",
                         log.debug("moving "+os.path.join(normalize,word,audio)+' '+os.path.join(outdir,"~LargerThan_duer",word))
                         shutil.move(os.path.join(normalize,word,audio), os.path.join(outdir,"~LargerThan_duer",word))
                 except:
-                    log.error("form normalizing "+sys.exc_info())
+                    log.error("form normalizing "+str(sys.exc_info()))
                     os.makedirs(os.path.join(outdir,"~Defects",word), exist_ok=True)
                     log.debug("moving "+os.path.join(normalize,word,audio)+' '+os.path.join(outdir,"~Defects",word))
                     shutil.move(os.path.join(normalize,word,audio), os.path.join(outdir,"~Defects",word))
@@ -148,7 +148,7 @@ def wta(infile= "infile.txt", outdir= "output",
                         log.debug("moving "+os.path.join(outdir,word,audio_file)+' '+os.path.join(outdir,"~LargerThan_duer",word))
                         shutil.move(os.path.join(outdir,word,audio_file), os.path.join(outdir,"~LargerThan_duer",word))
                 except:
-                    log.error("form normalizing "+os.path.join(word,audio_file)+' '+sys.exc_info())
+                    log.error("form normalizing "+os.path.join(word,audio_file)+' '+str(sys.exc_info()))
                     os.makedirs(os.path.join(outdir,"~Defects",word), exist_ok=True)
                     log.debug("moving "+os.path.join(outdir,word,"f.mp3")+' '+os.path.join(outdir,"~Defects",word))
                     shutil.move(os.path.join(outdir,word,"f.mp3"), os.path.join(outdir,"~Defects",word))
