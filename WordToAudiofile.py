@@ -27,8 +27,22 @@ def _get_voices(seq):
         id_ns = seq
     return gtts, [voices[i-1] for i in id_ns]
 
+def _change_duer(p_af, p_maf, duer, fr= None) :
+    """$p_af is path of input audio file
+    $p_maf is path for output audio file
+    $duer = output audio file duration
+    $fr = output audio file frame rate"""
+    with open(p_af, 'rb') as af :
+        sound = As.from_file(af)
+    new_fr = int(sound.frame_count() / duer)
+    m_sound = sound._spawn(sound.raw_data, #modified_sound
+                           overrides={'frame_rate':new_fr})
+    m_sound = m_sound.set_frame_rate(fr if fr else sound.frame_rate)
+    m_sound.export(p_maf, format=os.path.splitext(p_maf)[1])
+    return len(m_sound), m_sound.frame_count(), m_sound.frame_rate
+
 def wta(infile= "infile.txt", outdir= "output",
-        seq= [0,...], normalize= [0,...],
+        seq= [0,...], normalize= [0,...], modify= False,
         duer= 2000, rmold= False) :
     """ 
     to generate audio files for given words in $infile
@@ -40,11 +54,15 @@ def wta(infile= "infile.txt", outdir= "output",
     if $seq has ... => all voices are generated
     if $seq has both ... and numbers => all voices except all_(number-1)th_voices are generated
 
-    $normaliz is for making each audio files in same duration
+    $normalize is for making each audio files have same duration
     by adding silence at ends based on given total_duration_of_each_file $duer
+
+    $modify is for making each audio files have same duration by modifying frame_count
 
     $rmold : enable to remove old files f.mp3, m.mp3, f1.mp3
     > best pratice is to call rmold function seperatly after normalizing is done
+
+    > don't enable both normalize and modify if rmold is True
     """
     if type(seq)==list :
         gtts, voices = _get_voices(seq)
@@ -88,6 +106,7 @@ def wta(infile= "infile.txt", outdir= "output",
 
     if type(normalize)==str and os.path.isdir(normalize):
         words = os.listdir(normalize)
+        log.debug(str(words))
         for word in words :
             audios = os.listdir(os.path.join(normalize,word))
             for audio in audios :
@@ -100,20 +119,18 @@ def wta(infile= "infile.txt", outdir= "output",
                             sound = As.silent(duration=rem)+sound+As.silent(duration=rem)
                         else :
                             sound = As.silent(duration=rem+1)+sound+As.silent(duration=rem)
-                        new_audio = audio.split('.')
-                        new_audio[0] = new_audio[0].upper()
-                        new_audio = '.'.join(new_audio)
-                        sound.export(os.path.join(normalize,word,new_audio), format='mp3')
+                        sound.export(os.path.join(normalize,word,"N"+audio), format='mp3')
                         if rmold : os.remove(os.path.join(normalize,word,audio))
                     else:
-                        os.makedirs(os.path.join(outdir,"~LargerThan_duer",word), exist_ok=True)
-                        log.debug("moving "+os.path.join(normalize,word,audio)+' '+os.path.join(outdir,"~LargerThan_duer",word))
-                        shutil.move(os.path.join(normalize,word,audio), os.path.join(outdir,"~LargerThan_duer",word))
+                        log.error("from normalizing "+os.path.join(word,audio)+" duration greater than "+str(duer))
+                        os.makedirs(os.path.join(normalize,"~LargerThan_duer",word), exist_ok=True)
+                        log.debug("moving "+os.path.join(normalize,word,audio)+' '+os.path.join(normalize,"~LargerThan_duer",word))
+                        shutil.move(os.path.join(normalize,word,audio), os.path.join(normalize,"~LargerThan_duer",word))
                 except:
                     log.error("form normalizing "+str(sys.exc_info()))
-                    os.makedirs(os.path.join(outdir,"~Defects",word), exist_ok=True)
-                    log.debug("moving "+os.path.join(normalize,word,audio)+' '+os.path.join(outdir,"~Defects",word))
-                    shutil.move(os.path.join(normalize,word,audio), os.path.join(outdir,"~Defects",word))
+                    os.makedirs(os.path.join(normalize,"~Defects",word), exist_ok=True)
+                    log.debug("moving "+os.path.join(normalize,word,audio)+' '+os.path.join(normalize,"~Defects",word))
+                    shutil.move(os.path.join(normalize,word,audio), os.path.join(normalize,"~Defects",word))
         log.info("normalizing done "+normalize)
 
     elif type(normalize)==list :
@@ -128,6 +145,7 @@ def wta(infile= "infile.txt", outdir= "output",
                 words = words_file.read().replace('\n',' ').split()
             words = [''.join(filter(str.isalnum,x)) for x in words]
             words = list(filter(len,words))
+        words = list(set(words))
 
         log.debug(str(words)+'\n'+str(audio_files))
         for word in words:
@@ -144,6 +162,7 @@ def wta(infile= "infile.txt", outdir= "output",
                         sound.export(os.path.join(outdir,word,"N"+audio_file), format='mp3')
                         if rmold : os.remove(os.path.join(outdir,word,audio_file))
                     else:
+                        log.error("from normalizing "+os.path.join(word,audio_file)+" duration greater than "+str(duer))
                         os.makedirs(os.path.join(outdir,"~LargerThan_duer",word), exist_ok=True)
                         log.debug("moving "+os.path.join(outdir,word,audio_file)+' '+os.path.join(outdir,"~LargerThan_duer",word))
                         shutil.move(os.path.join(outdir,word,audio_file), os.path.join(outdir,"~LargerThan_duer",word))
@@ -153,6 +172,56 @@ def wta(infile= "infile.txt", outdir= "output",
                     log.debug("moving "+os.path.join(outdir,word,"f.mp3")+' '+os.path.join(outdir,"~Defects",word))
                     shutil.move(os.path.join(outdir,word,"f.mp3"), os.path.join(outdir,"~Defects",word))
         log.info("normalizing done "+str(normalize))
+
+    if type(modify)==str and os.path.isdir(modify):
+        words = os.listdir(modify)
+        for word in words :
+            audios = os.listdir(os.path.join(modify,word))
+            for audio in audios :
+                try:
+                    log.debug("modifing "+os.path.join(modify,word,audio)+" to "+os.path.join(modify,word,"M"+audio))
+                    retrn = _change_duer(os.path.join(modify,word,audio), os.path.join(modify,word,"M"+audio), duer)
+                    if retrn[0] == duer :
+                        log.debug("modifier returned with "+str(retrn))
+                    else :
+                        log.error("modifier not able to change dueration for this audio")
+                        raise Exception("modifier not able to change dueration")
+                except:
+                    log.error("form modifier "+os.path.join(word,audio)+' '+str(sys.exc_info()))
+                    os.makedirs(os.path.join(modify,"~Defects",word), exist_ok=True)
+                    log.debug("moving "+os.path.join(modify,word,audio)+' '+os.path.join(modify,"~Defects",word))
+                    shutil.move(os.path.join(modify,word,audio), os.path.join(modify,"~Defects",word))
+
+    elif type(modify)==list :
+        gtts, voices = _get_voices(modify)
+        audio_files = [voice+'.mp3' for voice in voices]
+        if gtts : audio_files.append("gtts.mp3")
+
+        if 'err_free_words' in locals().keys() :
+             words = err_free_words
+        else :
+            with open(infile,"r") as words_file :
+                words = words_file.read().replace('\n',' ').split()
+            words = [''.join(filter(str.isalnum,x)) for x in words]
+            words = list(filter(len,words))
+        words = list(set(words))
+
+        log.debug(str(words)+'\n'+str(audio_files))
+        for word in words:
+            for audio_file in audio_files :
+                try:
+                    log.debug("modifing "+os.path.join(outdir,word,audio_file)+" to "+os.path.join(outdir,word,"M"+audio_file))
+                    retrn = _change_duer(os.path.join(outdir,word,audio_file), os.path.join(outdir,word,"M"+audio_file), duer)
+                    if retrn[0] == duer :
+                        log.debug("modifier returned with "+str(retrn))
+                    else :
+                        log.error("modifier not able to change dueration for this audio")
+                        raise Exception("modifier not able to change dueration")
+                except:
+                    log.error("form modifier "+os.path.join(word,audio_file)+' '+str(sys.exc_info()))
+                    os.makedirs(os.path.join(outdir,"~Defects",word), exist_ok=True)
+                    log.debug("moving "+os.path.join(outdir,word,audio_file)+' '+os.path.join(outdir,"~Defects",word))
+                    shutil.move(os.path.join(outdir,word,audio_file), os.path.join(outdir,"~Defects",word))
 
 def rmold (outdir= "output", seq= [0,...], move= False):
     """
