@@ -15,8 +15,26 @@ we can also making all audio files for same duration
 ```python3
 import WordToAudioFile as wta
 wta.wta(infile= "words_file.txt", outdir= "dataset",
-        seq= [0,...], normalizer= [0,...],
-        duer= 1000 # in miliseconds
-        )
+        seq= [0,...], normalize= [0,...],
+        duer= 1000) # in miliseconds
 wta.rmold(outdir= "dataset", seq= [0,...])
+```
+## Modifying
+we can change duration of audio files by changing its frame_rate and frame_count other than adding silence
+```python3
+import WordToAudioFile as wta
+wta.wta(infile= "words_file.txt", outdir= "dataset",
+        seq= [0,...], normalize= False, modify= [0,...],
+        duer= 1000)
+wta.rmold(outdir= "dataset", seq= [0,...])
+```
+
+# Voice_recorder
+this is to record human voices as audio files for given words
+
+##### example
+```python3
+import voice_recorder
+voice_recorder.record(infile= "words_file.txt", outdir= "dataset",
+                      duer= 1000)
 ```
