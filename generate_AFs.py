@@ -1,6 +1,6 @@
 import pyttsx3, sys, os, time
 
-engine = pyttsx3.Engine()
+engine = pyttsx3.init()
 if len(sys.argv)>3 :
     try :
         voices = engine.getProperty('voices')
@@ -8,7 +8,9 @@ if len(sys.argv)>3 :
     except ValueError :
         engine.setProperty('voice', sys.argv[3])
 dir_ = os.path.split(sys.argv[2])
-if len(dir_[0]) : os.mkdir(dir_[0])
+if len(dir_[0]) :
+    try : os.mkdir(dir_[0])
+    except : pass
 engine.save_to_file(sys.argv[1], sys.argv[2])
 engine.runAndWait()
 
