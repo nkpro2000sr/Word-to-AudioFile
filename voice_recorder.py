@@ -35,8 +35,7 @@ def record_audio(word, duer, outdir, name):
     stream.close()
     audio.terminate()
 
-    try : os.mkdir(os.path.split(WAVE_OUTPUT_FILENAME)[0])
-    except : pass
+    os.makedirs(os.path.split(WAVE_OUTPUT_FILENAME)[0], exist_ok=True)
     waveFile = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
     waveFile.setnchannels(CHANNELS)
     waveFile.setsampwidth(audio.get_sample_size(FORMAT))
