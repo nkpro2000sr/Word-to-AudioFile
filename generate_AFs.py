@@ -9,8 +9,7 @@ if len(sys.argv)>3 :
         engine.setProperty('voice', sys.argv[3])
 dir_ = os.path.split(sys.argv[2])
 if len(dir_[0]) :
-    try : os.mkdir(dir_[0])
-    except : pass
+    os.makedirs(dir_[0], exist_ok=True)
 engine.save_to_file(sys.argv[1], sys.argv[2])
 engine.runAndWait()
 
