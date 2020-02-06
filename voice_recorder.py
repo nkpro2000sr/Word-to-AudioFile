@@ -14,21 +14,21 @@ def record_audio(word, duer, outdir, name):
     CHUNK = 1024
     RECORD_SECONDS = duer/1000
     WAVE_OUTPUT_FILENAME = os.path.join(outdir,word,name+".wav")
-	 
+
     audio = pyaudio.PyAudio()
-	 
+
     # start Recording
     stream = audio.open(format=FORMAT, channels=CHANNELS,
                         rate=RATE, input=True,
                         frames_per_buffer=CHUNK)
     print("recording...")
     frames = []
-	 
+
     for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)) :
         print("|>",end='')
         data = stream.read(CHUNK)
         frames.append(data)
-    print("finished recording\n")
+    print("\nfinished recording\n")
 
     # stop Recording
     stream.stop_stream()
@@ -52,7 +52,7 @@ def get_words(p_words_file, sep):
     words = list(filter(lambda x:x.isalnum(), words))
     return words
 
-def record(infile= "infile.txt", outdir= "output", duer= 1000, sep= -1):
+def record(infile= "infile.txt", outdir= "output", duer= 2000, sep= -1):
     """
     $infile : file contains words to be recorded
     $outdir : directory where the voices are stored
@@ -62,11 +62,12 @@ def record(infile= "infile.txt", outdir= "output", duer= 1000, sep= -1):
 
     words = get_words(infile, sep)
     global index
+    index = 0
     if os.path.isfile("index") :
         with open("index",'r') as kept :
             index = int(kept.read())
+            print("index",index,"is restored")
         os.remove("index")
-    index = 0
 
     print("""
 welcome to continous_WordRecorder !
@@ -82,7 +83,7 @@ this app supports diffent key events :
 """)
 
     name = input("please enter your name : ")
-    print("\nSay>",words[index])
+    print(str(index)+". Say>",words[index])
     print("press r for start recording")
 
     def on_press(key):
@@ -98,16 +99,17 @@ this app supports diffent key events :
                 print("you done all your recordings succefully :)")
                 return
             index += 1
-            print("Say>",words[index])
+            print(str(index)+". Say>",words[index])
             print("press r for start recording")
         elif char == 'k' : # keep index for later
             with open("index",'w') as keep :
                 keep.write(str(index))
+            print("index",index,"saved in index file")
         elif char == 'p' : # re record previous word
             index -= 1
             print("Say>",words[index])
             print("press r for start recording")
-        elif char == 'e' : # to exit 
+        elif char == 'e' : # to exit
             exit(0)
         elif char == 'i' : # to manually set index
             index = int(input("index >"))
