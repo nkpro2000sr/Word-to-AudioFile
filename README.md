@@ -10,21 +10,22 @@ import WordToAudioFile as wta
 wta.wta(infile= "words_file.txt", outdir= "dataset", seq= [0,...])
 ```
 
-## Normalizing
+## To Fix Duration (Audio Length)
+### Adding Silence
 we can also making all audio files for same duration
 ```python3
 import WordToAudioFile as wta
 wta.wta(infile= "words_file.txt", outdir= "dataset",
-        seq= [0,...], normalize= [0,...],
+        seq= [0,...], add_silence= [0,...],
         duer= 1000) # in miliseconds
 wta.rmold(outdir= "dataset", seq= [0,...])
 ```
-## Modifying
+### Stretch or Shrink
 we can change duration of audio files by changing its frame_rate and frame_count other than adding silence
 ```python3
 import WordToAudioFile as wta
 wta.wta(infile= "words_file.txt", outdir= "dataset",
-        seq= [0,...], normalize= False, modify= [0,...],
+        seq= [0,...], add_silence= False, fill_fit= [0,...],
         duer= 1000)
 wta.rmold(outdir= "dataset", seq= [0,...])
 ```
