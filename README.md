@@ -29,12 +29,12 @@ wta.wta(infile= "words_file.txt", outdir= "dataset",
 wta.rmold(outdir= "dataset", seq= [0,...])
 ```
 
-# Voice_recorder
+# Voice_recorder <img src="https://github.com/nkpro2000/For-nkpro2000sr/raw/master/icon.ico" alt="icon.ico" title="icon.ico" width="40" height="40"/>
 this is to record human voices as audio files for given words
 
 ##### example
 ```python3
 import voice_recorder
 voice_recorder.record(infile= "words_file.txt", outdir= "dataset",
-                      duer= 1000)
+                      duer= 3000, sep= '\n', speech=1)
 ```
