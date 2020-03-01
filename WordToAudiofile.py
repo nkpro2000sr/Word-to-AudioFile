@@ -54,16 +54,22 @@ def wta(infile= "infile.txt", outdir= "output",
     if $seq has ... => all voices are generated
     if $seq has both ... and numbers => all voices except all_(number-1)th_voices are generated
 
-    $add_silence is for making each audio files have same duration
+    $add_silence : boolean, enable to making each audio files have same duration
     by adding silence at ends based on given total_duration_of_each_file $duer
 
-    $fill_fit is for making each audio files have same duration by stretch or shrink the audio
+    $fill_fit : boolean, enable to making each audio files have same duration by stretch or shrink the audio
 
-    $rmold : enable to remove old files
+    $rmold : boolean, enable to remove old files
     > best pratice is to call rmold function seperatly after wta is done
+
+    $return[0] = list of successfully audio file generated words
+    $return[1] = no. of words classified as longer than given dureation $duer
+    $return[2] = no. of words classified as defects while doing add_silence or fill_fit
 
     > don't enable both add_silence and fill_fit if rmold is True
     """
+    longer, defects = 0, 0
+
     if type(seq)==list :
         gtts, voices = _get_voices(seq)
 
@@ -125,11 +131,13 @@ def wta(infile= "infile.txt", outdir= "output",
                         sound.export(os.path.join(add_silence,word,"S"+audio), format='mp3')
                         if rmold : os.remove(os.path.join(add_silence,word,audio))
                     else:
+                        longer += 1
                         log.error("from add_silence"+os.path.join(word,audio)+" duration greater than "+str(duer))
-                        os.makedirs(os.path.join(add_silence,"~LargerThan_duer",word), exist_ok=True)
-                        log.debug("moving "+os.path.join(add_silence,word,audio)+' '+os.path.join(add_silence,"~LargerThan_duer",word))
-                        shutil.move(os.path.join(add_silence,word,audio), os.path.join(add_silence,"~LargerThan_duer",word))
+                        os.makedirs(os.path.join(add_silence,"~LongerThan_duer",word), exist_ok=True)
+                        log.debug("moving "+os.path.join(add_silence,word,audio)+' '+os.path.join(add_silence,"~LongerThan_duer",word))
+                        shutil.move(os.path.join(add_silence,word,audio), os.path.join(add_silence,"~LongerThan_duer",word))
                 except:
+                    defects += 1
                     log.error("form add_silence "+str(sys.exc_info()))
                     os.makedirs(os.path.join(add_silence,"~Defects",word), exist_ok=True)
                     log.debug("moving "+os.path.join(add_silence,word,audio)+' '+os.path.join(add_silence,"~Defects",word))
@@ -166,11 +174,13 @@ def wta(infile= "infile.txt", outdir= "output",
                         sound.export(os.path.join(outdir,word,"S"+audio_file), format='mp3')
                         if rmold : os.remove(os.path.join(outdir,word,audio_file))
                     else:
+                        longer += 1
                         log.error("from add_silence "+os.path.join(word,audio_file)+" duration greater than "+str(duer))
-                        os.makedirs(os.path.join(outdir,"~LargerThan_duer",word), exist_ok=True)
-                        log.debug("moving "+os.path.join(outdir,word,audio_file)+' '+os.path.join(outdir,"~LargerThan_duer",word))
-                        shutil.move(os.path.join(outdir,word,audio_file), os.path.join(outdir,"~LargerThan_duer",word))
+                        os.makedirs(os.path.join(outdir,"~LongerThan_duer",word), exist_ok=True)
+                        log.debug("moving "+os.path.join(outdir,word,audio_file)+' '+os.path.join(outdir,"~LongerThan_duer",word))
+                        shutil.move(os.path.join(outdir,word,audio_file), os.path.join(outdir,"~LongerThan_duer",word))
                 except:
+                    defects += 1
                     log.error("form add_silence "+os.path.join(word,audio_file)+' '+str(sys.exc_info()))
                     os.makedirs(os.path.join(outdir,"~Defects",word), exist_ok=True)
                     log.debug("moving "+os.path.join(outdir,word,audio_file)+' '+os.path.join(outdir,"~Defects",word))
@@ -192,6 +202,7 @@ def wta(infile= "infile.txt", outdir= "output",
                         log.error("change_duer not able to change dueration for this audio")
                         raise Exception("change_duer not able to change dueration")
                 except:
+                    defects += 1
                     log.error("form fill_fitter "+os.path.join(word,audio)+' '+str(sys.exc_info()))
                     os.makedirs(os.path.join(fill_fit,"~Defects",word), exist_ok=True)
                     log.debug("moving "+os.path.join(fill_fit,word,audio)+' '+os.path.join(fill_fit,"~Defects",word))
@@ -223,13 +234,14 @@ def wta(infile= "infile.txt", outdir= "output",
                         log.error("change_duer not able to change dueration for this audio")
                         raise Exception("change_duer not able to change dueration")
                 except:
+                    defects += 1
                     log.error("form fill_fitter "+os.path.join(word,audio_file)+' '+str(sys.exc_info()))
                     os.makedirs(os.path.join(outdir,"~Defects",word), exist_ok=True)
                     log.debug("moving "+os.path.join(outdir,word,audio_file)+' '+os.path.join(outdir,"~Defects",word))
                     shutil.move(os.path.join(outdir,word,audio_file), os.path.join(outdir,"~Defects",word))
 
     log.info("wta all done.")
-    return err_free_words
+    return err_free_words, longer, defects
 
 def rmold (outdir= "output", seq= [0,...], move= False):
     """
